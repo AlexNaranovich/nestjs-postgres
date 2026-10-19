@@ -9,7 +9,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  ыfindAll(@Query() pagination: PaginationDto) {
+  findAll(@Query() pagination: PaginationDto) {
     return this.usersService.findAll(pagination);
   }
 
