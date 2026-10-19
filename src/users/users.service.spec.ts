@@ -32,6 +32,44 @@ describe('UsersService', () => {
     service = module.get(UsersService);
   });
 
+  it('обновляет имя, сохраняя остальные поля', async () => {
+  const user = {
+    id: 3,
+    name: 'Alex',
+    email: 'alex@example.com',
+    createdAt: new Date('2026-10-19T12:00:00.000Z'),
+  };
+
+  repository.findOneBy.mockResolvedValue(user);
+  repository.save.mockImplementation(async (value) => value);
+
+  const result = await service.update(3, {
+    name: 'Alexander',
+  });
+
+  expect(repository.findOneBy).toHaveBeenCalledWith({ id: 3 });
+
+  expect(repository.save).toHaveBeenCalledWith({
+    id: 3,
+    name: 'Alexander',
+    email: 'alex@example.com',
+    createdAt: user.createdAt,
+  });
+
+  expect(result.name).toBe('Alexander');
+  expect(result.email).toBe('alex@example.com');
+  });
+
+  it('не сохраняет изменения, если пользователь отсутствует', async () => {
+  repository.findOneBy.mockResolvedValue(null);
+
+  await expect(
+    service.update(999, { name: 'Alexander' }),
+  ).rejects.toBeInstanceOf(NotFoundException);
+
+  expect(repository.save).not.toHaveBeenCalled();
+  });
+
   it('успешно удаляет существующего пользователя', async () => {
   repository.delete.mockResolvedValue({ affected: 1 });
 
