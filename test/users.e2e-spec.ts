@@ -9,6 +9,7 @@ describe('Users API', () => {
 
   const usersService = {
     findAll: jest.fn(),
+    create: jest.fn(),
   };
 
   beforeAll(async () => {
@@ -82,5 +83,55 @@ describe('Users API', () => {
       .expect(400);
 
     expect(usersService.findAll).not.toHaveBeenCalled();
+  });
+  it('POST /users создаёт пользователя и возвращает 201', async () => {
+  const body = {
+    name: 'Maria',
+    email: 'maria@example.com',
+  };
+
+  const createdUser = {
+    id: 10,
+    ...body,
+    createdAt: '2026-10-19T12:00:00.000Z',
+  };
+
+  usersService.create.mockResolvedValue(createdUser);
+
+  await request(app.getHttpServer())
+    .post('/users')
+    .send(body)
+    .expect(201)
+    .expect(createdUser);
+
+  expect(usersService.create).toHaveBeenCalledTimes(1);
+  expect(usersService.create).toHaveBeenCalledWith(
+    expect.objectContaining(body),
+  );
+  });
+
+  it('POST /users отклоняет пустое имя и неверный email', async () => {
+  await request(app.getHttpServer())
+    .post('/users')
+    .send({
+      name: '',
+      email: 'not-an-email',
+    })
+    .expect(400);
+
+  expect(usersService.create).not.toHaveBeenCalled();
+  });
+
+  it('POST /users отклоняет лишнее поле role', async () => {
+  await request(app.getHttpServer())
+    .post('/users')
+    .send({
+      name: 'Maria',
+      email: 'maria@example.com',
+      role: 'admin',
+    })
+    .expect(400);
+
+  expect(usersService.create).not.toHaveBeenCalled();
   });
 });
