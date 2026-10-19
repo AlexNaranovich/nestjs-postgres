@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { QueryFailedError, Repository, ILike } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -13,15 +13,17 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async findAll(pagination: PaginationDto) {
-  const { page, limit } = pagination;
+    async findAll(pagination: PaginationDto) {
+    const { page, limit } = pagination;
+    const search = pagination.search?.trim();
 
-  const [data, total] = await this.usersRepository.findAndCount({
+    const [data, total] = await this.usersRepository.findAndCount({
+      where: search ? { name: ILike(`%${search}%`) } : {},
       order: { id: 'ASC' },
       skip: (page - 1) * limit,
       take: limit,
     });
-
+  
     return {
       data,
       total,
