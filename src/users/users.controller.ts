@@ -1,15 +1,16 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Delete, HttpCode, HttpStatus, Patch,} from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Delete, HttpCode, HttpStatus, Patch, Query,} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  ыfindAll(@Query() pagination: PaginationDto) {
+    return this.usersService.findAll(pagination);
   }
 
   @Get(':id')
